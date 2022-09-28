@@ -3,7 +3,12 @@ import autores from '../models/Autor.js';
 class AutorController {
     static listarAutores = (req, res) => {
         autores.find((err, autores) => {
-            res.status(200).json(autores)
+            if(autores.length > 0){
+                res.status(200).json(autores)
+            }
+            else{
+                res.status(200).json({message: "Nenhum autor encontrado!"})
+            }
         });
     }
 
@@ -20,16 +25,27 @@ class AutorController {
     }
 
     static cadastrarAutor = (req, res) => {
-        let autor = new autores(req.body);
 
-        autor.save((err) => {
-            if(err){
-                res.status(500).send({message: `${err.message} - falha ao cadastrar autor.`})
+        autores.find(req.body, {}, (err, autoresEncontrados) => {
+            if(autoresEncontrados.length > 0){
+                res.status(500).send({message: 'este autor já foi cadastrado'})
             }
             else{
-                res.status(201).send(autor.toJSON())
+
+                let autor = new autores(req.body);
+
+                autor.save((err) => {
+                    if(err){
+                        res.status(500).send({message: `${err.message} - falha ao cadastrar autor.`})
+                    }
+                    else{
+                        res.status(201).send(autor.toJSON())
+                    }
+                })
+
             }
-        })
+        });
+
     }
 
     static atualizarAutor = (req, res) => {
